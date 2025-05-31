@@ -1,56 +1,47 @@
 import { Component, OnInit } from '@angular/core';
 
+interface TodoItem {
+  title: string;
+  estimatedTime: number;
+  status: string;
+}
+
 @Component({
   selector: 'app-todo',
   templateUrl: './todo.component.html',
   styleUrls: ['./todo.component.css']
 })
 export class TodoComponent implements OnInit {
-  tasks: { name: string; estimatedTime: number; status: string }[] = [];
-  newTaskName: string = '';
-  newTaskEstimatedTime: number | null = null;
+  todos: TodoItem[] = [];
+  newTodo: TodoItem = { title: '', estimatedTime: 0, status: 'pending' };
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
     // Load tasks from local storage or initialize empty
     const storedTasks = localStorage.getItem('tasks');
-    this.tasks = storedTasks ? JSON.parse(storedTasks) : [];
+    this.todos = storedTasks ? JSON.parse(storedTasks) : [];
   }
 
-  addTask(): void {
-    if (this.newTaskName && this.newTaskEstimatedTime) {
-      this.tasks.push({
-        name: this.newTaskName,
-        estimatedTime: this.newTaskEstimatedTime,
-        status: 'pending'
-      });
+  addTodo(): void {
+    if (this.newTodo.title.trim()) {
+      this.todos.push({ ...this.newTodo });
       this.saveTasks();
-      this.newTaskName = '';
-      this.newTaskEstimatedTime = null;
+      this.newTodo = { title: '', estimatedTime: 0, status: 'pending' };
     }
   }
 
-  startTask(task: { name: string; estimatedTime: number; status: string }): void {
-    task.status = 'in-progress';
+  removeTodo(index: number): void {
+    this.todos.splice(index, 1);
     this.saveTasks();
-    this.startTimer(task);
   }
 
-  startTimer(task: { estimatedTime: number }): void {
-    let timeLeft = task.estimatedTime;
-    const timerInterval = setInterval(() => {
-      if (timeLeft > 0) {
-        timeLeft--;
-      } else {
-        clearInterval(timerInterval);
-        task.status = 'completed';
-        this.saveTasks();
-      }
-    }, 1000);
+  markAsCompleted(todo: TodoItem): void {
+    todo.status = 'completed';
+    this.saveTasks();
   }
 
   saveTasks(): void {
-    localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    localStorage.setItem('tasks', JSON.stringify(this.todos));
   }
 }

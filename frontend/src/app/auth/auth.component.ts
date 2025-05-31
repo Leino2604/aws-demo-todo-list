@@ -1,43 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
   authForm: FormGroup;
-  isSignIn: boolean = true;
+  isLogin = true;
+  error = '';
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService
+  ) {
     this.authForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required]
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
-  toggleMode() {
-    this.isSignIn = !this.isSignIn;
-    this.authForm.reset();
+  ngOnInit(): void {
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.authForm.valid) {
-      if (this.isSignIn) {
-        this.authService.signIn(this.authForm.value).subscribe(response => {
-          // Handle successful sign-in
-        }, error => {
-          // Handle sign-in error
-        });
+      const { email, password } = this.authForm.value;
+
+      if (this.isLogin) {
+        this.authService.login(email, password).subscribe(
+          (response: any) => {
+            localStorage.setItem('token', response.token);
+          },
+          (error: any) => {
+            this.error = error.error.message || 'Login failed';
+          }
+        );
       } else {
-        this.authService.signUp(this.authForm.value).subscribe(response => {
-          // Handle successful sign-up
-        }, error => {
-          // Handle sign-up error
-        });
+        this.authService.register(email, password).subscribe(
+          (response: any) => {
+            localStorage.setItem('token', response.token);
+          },
+          (error: any) => {
+            this.error = error.error.message || 'Registration failed';
+          }
+        );
       }
     }
+  }
+
+  toggleAuthMode(): void {
+    this.isLogin = !this.isLogin;
+    this.error = '';
   }
 }

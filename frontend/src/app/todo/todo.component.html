@@ -1,23 +1,25 @@
-<div>
-<h1>To-Do List</h1>
-<div>
-  <h2>Your Tasks</h2>
-  <ul>
-    <li *ngFor="let task of tasks">
-      <span>{{ task.name }} - Estimated Time: {{ task.estimatedTime }} mins</span>
-      <button (click)="startTask(task)">Start</button>
-      <button (click)="completeTask(task)">Complete</button>
-    </li>
-  </ul>
-</div>
-<div>
-  <h2>Add New Task</h2>
-  <input [(ngModel)]="newTaskName" placeholder="Task Name" />
-  <input [(ngModel)]="newTaskEstimatedTime" type="number" placeholder="Estimated Time (mins)" />
-  <button (click)="addTask()">Add Task</button>
-</div>
-<div>
-  <h2>Pomodoro Timer</h2>
-  <pomodoro-timer></pomodoro-timer>
-</div>
+<div class="todo-container">
+  <h1>To-Do List</h1>
+  <div>
+    <h2>Your Tasks</h2>
+    <ul class="todo-list">
+      <li *ngFor="let todo of todos; let i = index" class="todo-item" [class.completed]="todo.status === 'completed'">
+        <span>{{ todo.title }} - Estimated Time: {{ todo.estimatedTime }} mins</span>
+        <div>
+          <button class="btn btn-primary" (click)="markAsCompleted(todo)">Complete</button>
+          <button class="btn btn-danger" (click)="removeTodo(i)">Delete</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <div class="todo-form">
+    <h2>Add New Task</h2>
+    <input [(ngModel)]="newTodo.title" placeholder="Task Name" class="form-control" />
+    <input [(ngModel)]="newTodo.estimatedTime" type="number" placeholder="Estimated Time (mins)" class="form-control" />
+    <button (click)="addTodo()" class="btn btn-success">Add Task</button>
+  </div>
+  <div>
+    <h2>Pomodoro Timer</h2>
+    <app-pomodoro></app-pomodoro>
+  </div>
 </div>

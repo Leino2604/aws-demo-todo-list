@@ -1,31 +1,41 @@
 <div>
-<h2>Pomodoro Component Template</h2>
-<p>This is the HTML template for the Pomodoro component, which includes controls for starting the timer, setting work/rest durations, and displaying the timer countdown.</p>
+  <h2>Pomodoro Component Template</h2>
+  <p>This is the HTML template for the Pomodoro component, which includes controls for starting the timer, setting
+    work/rest durations, and displaying the timer countdown.</p>
 
-<div>
-  <h3>Pomodoro Timer</h3>
-  <div>
-    <label for="workDuration">Work Duration (minutes):</label>
-    <input type="number" id="workDuration" [(ngModel)]="workDuration" min="1" />
+  <div class="pomodoro-container">
+    <h3>Pomodoro Timer</h3>
+
+    <div class="settings">
+      <div class="form-group">
+        <label for="workDuration">Work Duration (minutes)</label>
+        <input type="number" id="workDuration" class="form-control" [(ngModel)]="workDuration" min="1" max="60">
+      </div>
+
+      <div class="form-group">
+        <label for="restDuration">Rest Duration (minutes)</label>
+        <input type="number" id="restDuration" class="form-control" [(ngModel)]="restDuration" min="1" max="30">
+      </div>
+
+      <div class="form-group">
+        <label for="cycles">Number of Cycles</label>
+        <input type="number" id="cycles" class="form-control" [(ngModel)]="cycles" min="1" max="10">
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" (click)="startPomodoro()">Start</button>
+      <button class="btn btn-danger" (click)="stopPomodoro()">Stop</button>
+    </div>
+
+    <div class="timer-display" *ngIf="isActive">
+      <span>{{ remainingTime / 60 | number:'1.0-0' }}:{{ (remainingTime % 60) | number:'2.0-0' }}</span>
+    </div>
+
+    <div class="status" *ngIf="isActive">
+      <p [class.work-time]="isWorkTime" [class.rest-time]="!isWorkTime">
+        {{ isWorkTime ? 'Work Time' : 'Rest Time' }} - Cycle {{ currentCycle }}/{{ cycles }}
+      </p>
+    </div>
   </div>
-  <div>
-    <label for="restDuration">Rest Duration (minutes):</label>
-    <input type="number" id="restDuration" [(ngModel)]="restDuration" min="1" />
-  </div>
-  <div>
-    <label for="cycles">Number of Cycles:</label>
-    <input type="number" id="cycles" [(ngModel)]="cycles" min="1" />
-  </div>
-  <button (click)="startPomodoro()">Start Pomodoro</button>
-  <button (click)="stopPomodoro()">Stop Pomodoro</button>
-  
-  <h4>Timer</h4>
-  <div *ngIf="isRunning">
-    <p>{{ remainingTime | date:'mm:ss' }}</p>
-  </div>
-  <div *ngIf="!isRunning">
-    <p>Timer is stopped.</p>
-  </div>
-</div>
-</div>
 </div>

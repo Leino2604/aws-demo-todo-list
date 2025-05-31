@@ -1,33 +1,47 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "github.com/gorilla/mux"
-    "todo-app/backend/config"
-    "todo-app/backend/handlers"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/gorilla/mux"
+	"todo-app/backend/config"
+	"todo-app/backend/handlers"
 )
 
 func main() {
-    // Load configuration
-    cfg := config.LoadConfig()
+	// Load configuration
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
 
-    // Initialize router
-    r := mux.NewRouter()
+	// Initialize router
+	r := mux.NewRouter()
 
-    // Set up routes
-    r.HandleFunc("/api/auth/signup", handlers.SignUpHandler).Methods("POST")
-    r.HandleFunc("/api/auth/signin", handlers.SignInHandler).Methods("POST")
-    r.HandleFunc("/api/tasks", handlers.GetTasksHandler).Methods("GET")
-    r.HandleFunc("/api/tasks", handlers.CreateTaskHandler).Methods("POST")
-    r.HandleFunc("/api/tasks/{id}", handlers.UpdateTaskHandler).Methods("PUT")
-    r.HandleFunc("/api/tasks/{id}", handlers.DeleteTaskHandler).Methods("DELETE")
-    r.HandleFunc("/api/pomodoro/start", handlers.StartPomodoroHandler).Methods("POST")
-    r.HandleFunc("/api/pomodoro/stop", handlers.StopPomodoroHandler).Methods("POST")
+	// Create handler instances
+	authHandler := handlers.NewAuthHandler()
+	tasksHandler := handlers.NewTasksHandler()
+	pomodoroHandler := handlers.NewPomodoroHandler(25*time.Minute, 5*time.Minute, 4)
 
-    // Start server
-    log.Printf("Starting server on port %s...", cfg.ServerPort)
-    if err := http.ListenAndServe(":"+cfg.ServerPort, r); err != nil {
-        log.Fatalf("Could not start server: %s", err)
-    }
+	// Set up routes
+	api := r.PathPrefix("/api").Subrouter()
+	// Auth routes
+	api.HandleFunc("/auth/signup", authHandler.SignUp).Methods("POST")
+	api.HandleFunc("/auth/signin", authHandler.SignIn).Methods("POST")
+	// Task routes
+	api.HandleFunc("/tasks", tasksHandler.GetTasks).Methods("GET")
+	api.HandleFunc("/tasks", tasksHandler.CreateTask).Methods("POST")
+	api.HandleFunc("/tasks/{id}", tasksHandler.UpdateTask).Methods("PUT")
+	api.HandleFunc("/tasks/{id}", tasksHandler.DeleteTask).Methods("DELETE")
+	// Pomodoro routes
+	api.HandleFunc("/pomodoro/start", pomodoroHandler.StartPomodoro).Methods("POST")
+	api.HandleFunc("/pomodoro/stop", pomodoroHandler.StopPomodoro).Methods("POST")
+
+	// Start server
+	log.Printf("Starting server on port %s...", cfg.Port)
+	if err := http.ListenAndServe(":"+cfg.Port, r); err != nil {
+		log.Fatalf("Could not start server: %s", err)
+	}
 }
