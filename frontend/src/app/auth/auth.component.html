@@ -1,0 +1,30 @@
+<div>
+  <h2>Authentication</h2>
+  <form (ngSubmit)="onSubmit()" #authForm="ngForm">
+    <div>
+      <label for="username">Username:</label>
+      <input type="text" id="username" required [(ngModel)]="username" name="username">
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" required [(ngModel)]="password" name="password">
+    </div>
+    <div>
+      <button type="submit">Sign In</button>
+    </div>
+    <div>
+      <button type="button" (click)="toggleSignUp()">Switch to Sign Up</button>
+    </div>
+    <div *ngIf="isSignUp">
+      <h3>Sign Up</h3>
+      <div>
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" required [(ngModel)]="confirmPassword" name="confirmPassword">
+      </div>
+      <div>
+        <button type="submit" (click)="onSignUp()">Sign Up</button>
+      </div>
+    </div>
+  </form>
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+</div>
