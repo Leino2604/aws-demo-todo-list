@@ -1,0 +1,74 @@
+Resources:
+  TodoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: main
+      Role: !GetAtt TodoFunctionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaS3Bucket
+        S3Key: !Ref LambdaS3Key
+      Runtime: go1.x
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        DYNAMODB_TABLE: !Ref TodoTable
+        PASSWORD: !Ref PasswordSecret
+
+  TodoFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: TodoFunctionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource: !GetAtt TodoTable.Arn
+
+  TodoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: TodoItems
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  LambdaS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-lambda-bucket"
+
+  LambdaS3Key:
+    Type: AWS::S3::Object
+    Properties:
+      Bucket: !Ref LambdaS3Bucket
+      Key: "path/to/your/lambda.zip"  # Update this with the actual path to your Lambda code zip file
+
+Outputs:
+  TodoFunctionArn:
+    Description: "ARN of the Todo Lambda Function"
+    Value: !GetAtt TodoFunction.Arn
+
+  TodoTableName:
+    Description: "Name of the DynamoDB table"
+    Value: !Ref TodoTable
+
+  LambdaS3BucketName:
+    Description: "S3 Bucket for Lambda code"
+    Value: !Ref LambdaS3Bucket
